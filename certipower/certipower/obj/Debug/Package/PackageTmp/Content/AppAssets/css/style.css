@@ -1,0 +1,40 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : Apr 8, 2016, 1:23:29 AM
+    Author     : ok
+*/
+
+.ico{
+    border-radius: 100%;
+    width: 70px;
+    height: 70px;
+    margin-left: 38%;
+    /*display: none;*/
+}
+.container {
+    background: transparent url(../img/pattern.png) repeat top left;
+    /*background-image: url('../img/pattern.png');*/
+}
+h1, .h1, h2, .h2, h3, .h3 {
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+p {
+    margin-bottom: 4px;
+        font-size: 12px;
+}
+input[type="text"], input[type="password"], input[type="email"], input[type="number"] {
+    border-top-width: 0px;
+    border-right-width: 0px;
+    border-left-width: 0px;
+    background-color: transparent !important;
+}
+
+table,td,tr, .table-responsive {
+    border-width: 0px;
+    border: none;
+}

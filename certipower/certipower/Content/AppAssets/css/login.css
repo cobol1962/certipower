@@ -1,0 +1,30 @@
+body {
+    background-image: url("/Content/AppAssets/img/bc.jpg"); 
+    -webkit-background-size: auto;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    color: #FF2276;
+}
+#wrapper {
+    width: 100%;
+    padding: 10px;
+}
+.logo{
+    width: 150px;
+    margin: 26%;
+    margin-top: 65%;
+}
+button{
+    background-color: #FF2276;
+    color: whitesmoke;
+}
+input{
+    margin-top: 10px;
+    border-top-width: 0px;
+    border-right-width: 0px;
+    border-left-width: 0px;
+    background-color: transparent !important;
+}
