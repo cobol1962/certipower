@@ -26,8 +26,8 @@ Public Class socket_handler
         If msgObj("action") = "login" Then
             Me.Send(checkLogin(msgObj))
         End If
-        If msgObj("action") = "loadAllUsers" Then
-            Me.Send(allUsers(msgObj))
+        If msgObj("action") = "loadTable" Then
+            Me.Send(loadTable(msgObj))
         End If
         If msgObj("action") = "changePassword" Then
             Me.Send(passChange(msgObj))
@@ -45,9 +45,9 @@ Public Class socket_handler
         connection.Dispose()
         Return message("fnc") & "(" & rstr & ");"
     End Function
-    Public Function allUsers(message As Object) As String
+    Public Function loadTable(message As Object) As String
         Dim connection As New SqlConnection(My.Settings.connstring)
-        Dim sql As String = "SELECT * from Users order by 'ID'"
+        Dim sql As String = "SELECT * from " & message("tableid") & " order by 'ID'"
         connection.Open()
         Dim command As SqlCommand = New SqlCommand(sql, connection)
         Dim rdr As SqlDataReader = command.ExecuteReader()
@@ -55,7 +55,7 @@ Public Class socket_handler
         rdr.Close()
         connection.Close()
         connection.Dispose()
-        Return message("fnc") & "(" & rstr & ");"
+        Return message("fnc") & "('" & message("tablename") & "','" & rstr & "');"
     End Function
     Public Function passChange(message As Object)
         Dim connection As New SqlConnection(My.Settings.connstring)

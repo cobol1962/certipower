@@ -7,7 +7,7 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="#">NavBar</a>
+            <a class="navbar-brand" href="#">CERTIPOWER</a>
         </div>
         <div class="collapse navbar-collapse">
             <ul class="nav navbar-nav navbar-right">
@@ -17,8 +17,9 @@
                 <li><a href="javascript:localStorage.user = null;window.location.href='http://certipower.org';" target="_top">Logout</a></li>
             </ul>
             <ul class="nav navbar-nav">
-                <li class="active"><a href="#">Home</a></li>
-                <li>
+                <li target="admins" class="active"><a href="javascript:switchPage('admins');">Admins</a></li>
+                <li target="groups"><a href="javascript:switchPage('groups');">Groups</a></li>
+              <li>
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">Menu 1 <b class="caret"></b></a>
                     <ul class="dropdown-menu multi-level">
                         <li><a href="#">Action</a></li>
@@ -98,19 +99,56 @@
     </div>
 
 <div class="contentContainer admin">
-    <table id="users" class="table table-striped table-bordered" cellspacing="0" width="100%">
-        <thead>
-            <tr>
-                <th target="ID">ID</th>
-                <th target="Email">Email</th>
-                <th target="Password">Password</th>
-                <th target="FirstName">First name</th>
-                <th target="LastName">Last name</th>
-                <th target="AccountType">Account type</th>
-            </tr>
-        </thead>
-        <tbody>
+ 
+    <div class="page" id="admins">
+        <table id="users" addnew="addNewUser();" edit="editUser();" delete="deleteUser();" class="table table-striped table-bordered" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th target="ID">ID</th>
+                    <th target="Email">Email</th>
+                    <th target="Password">Password</th>
+                    <th target="UserName">User name</th>
+                    <th target="FirstName">First name</th>
+                    <th target="LastName">Last name</th>
+                    <th target="AccountType">Account type</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+       <div class="datacontent" id="userform">
+           <input id="userid" target="ID" style="display:none;" />
+            <div class="form-group col-lg-2 col-md-2 col-sm-2 col-xs-12">
+                <label class="control-label" for="email">Email</label>
+                <input class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="email" target="Email" />
+            </div>
+            <div class="form-group col-lg-2 col-md-2 col-sm-2 col-xs-12">
+                <label class="control-label" for="password">Password</label>
+                <input class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="password" target="Password" />
+            </div>
+           <div class="form-group col-lg-2 col-md-2 col-sm-2 col-xs-12">
+               <label class="control-label" for="username">User name</label>
+               <input class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="username" target="Username" />
+           </div>
+           <div class="form-group col-lg-2 col-md-2 col-sm-2 col-xs-12">
+               <label class="control-label" for="firstname">First name</label>
+               <input class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="firstname" target="FirstName" />
+           </div>
+           <div class="form-group col-lg-2 col-md-2 col-sm-2 col-xs-12">
+               <label class="control-label" for="lastname">Last name</label>
+               <input class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="lastname" target="LastName" />
+           </div>
+      </div>
+    </div>
 
-        </tbody>
-    </table>
-</div>
+    <div class="page" id="groups" style="display:none;">
+        <table id="group_table" class="table table-striped table-bordered" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th target="Id">ID</th>
+                    <th target="group_name">Group name</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+ </div> 

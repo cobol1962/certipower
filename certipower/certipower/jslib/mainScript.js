@@ -109,3 +109,11 @@ function changePasswordSuccess() {
         window.location.href ="http://www.certipower.org";
     });
 }
+function switchPage(pageid) {
+     var active = $(".active")[0].getAttribute("target");
+    $(".navbar").find("li").removeClass("active");
+    $("#" + active).slideToggle("slow", function () {
+        $("#" + pageid).slideToggle();
+    });
+    $("li[target='" + pageid + "']").addClass("active");
+}
