@@ -46,9 +46,11 @@ function fillTable(tablename, dta) {
       var ww = setInterval(function () {
         
           if (done == nmb) {
-              clearInterval(ww);
+            
+              clearInterval(ww);   
               eval(tablename + "_datatable = $('#' + tablename).DataTable({" +
                    "dom: 'Bfrtip'," +
+                   "bStateSave: true,"+
                    "buttons: [" +
                         " {" +
                         "      extend: 'copyHtml5'," +
@@ -74,38 +76,132 @@ function fillTable(tablename, dta) {
                     "          columns: [':visible']" +
                      "     }" +
                      " }," +
+                       " {" +
+                    "    extend: 'print'," +
+                    "      exportOptions: {" +
+                    "          columns: [':visible']" +
+                     "     }" +
+                     " }," +
                     "  'colvis'" +
                   " ]" +
                "});");
-              $('#' + tablename + ' tbody').on('click', 'tr', function () {
-                  if ($(this).hasClass('selected')) {
-                      $(this).removeClass('selected');
-                  }
-                  else {
-                      $('#' + tablename).find('tr.selected').removeClass('selected');
-                      $(this).addClass('selected');
-                      $.each($(this).find("td"), function () {
-                          $("input[target='" + $(this).attr("target") + "']").val(this.innerHTML);
-                      });
-                  }
-              });
+       
             /*  var dv = '<div class="dataTables_actions align-h">' +
                '<button type="button" onclick="' + $("#" + tablename).attr("addnew") + '" class="btn btn-info">Add new</button>' +
                '<button type="button" onclick="' + $("#" + tablename).attr("edit") + '"  class="btn btn-primary">Edit selected</button>' +
                '<button type="button" onclick="' + $("#" + tablename).attr("delete") + '"  class="btn btn-danger">Delete selected</button>';
               $(dv).insertBefore("#" + tablename + "_filter");*/
           }
-          $.each($("#userform").find("input"), function () {
-              $(this).unbind("change");
-              $(this).bind("change", function (e) {
-                  var td = $("#users tbody tr.selected td[target='" + $(this).attr("target") + "']");
-                  $(td).html($(this).val());
-                  users_datatable
-                    .row(tr)
-                    .invalidate()
-                    .draw();
-              });
-          })
+       
+          settableRowEvents(tablename);
+          setEvents("userform","users",users_datatable);
+          setEvents("groupform", "group_table", group_table_datatable);
       }, 100);
     
-  }
+}
+function settableRowEvents(tablename) {
+    eval("var table = " + tablename + "_datatable;");
+    $('#' + tablename + ' tbody').off('click', 'tr');
+    $('#' + tablename + ' tbody').on('click', 'tr', function () {
+       
+        if ($(this).hasClass('selected')) {
+            $(this).removeClass('selected');
+            $.each($(this).find("td"), function () {
+                $("input[target='" + $(this).attr("target") + "']").val("");
+            });
+            $("#" + this.parentNode.parentNode.getAttribute("frm")).find("button[formrole='add']").show();
+            $("#" + this.parentNode.parentNode.getAttribute("frm")).find("button[formrole='prepareadd']").hide();
+        } else {
+            table.$('tr.selected').removeClass('selected');
+            $(this).addClass('selected');
+            $.each($(this).find("td"), function () {
+                $("input[target='" + $(this).attr("target") + "']").val(this.innerHTML);
+            });
+            $("#" + this.parentNode.parentNode.getAttribute("frm")).find("button[formrole='add']").hide();
+            $("#" + this.parentNode.parentNode.getAttribute("frm")).find("button[formrole='prepareadd']").show();
+        }
+    });
+}
+function setEvents(formname, tablename, table) {
+  
+    $.each($("#" + formname).find("input"), function () {
+        $(this).unbind("change");
+        $(this).bind("change", function (e) {
+            if ($("#" + formname + " input[target='" + "ID" + "']").val() == "") {
+                return false;
+            }
+            var trr = table.$('tr.selected');
+           
+            var td = $("#" + tablename + " tbody tr.selected td[target='" + $(this).attr("target") + "']");
+            var tr = $("#" + tablename + " tbody tr.selected");
+            $(td).html($(this).val());
+            //table
+            //  .row(trr)
+            //  .invalidate()
+            //  .draw();
+
+            var newData = new Array();
+            $.each($("#" + tablename + " tbody tr.selected td"), function () {
+                newData.push($(this).html());
+            });
+            table
+             .row(trr)
+             .data(newData)
+             .draw( false )
+             .show();
+           
+            var message = JSON.stringify({ action: 'execQuery', query: "update " + $("#" + tablename).attr("db") + " set " + $(e.target).attr("target") + "='" + $(this).val() + "' where ID='" + $("#" + formname + " input[target='" + "ID" + "']").val() + "'",fnc:"" });
+             ws.send(message);
+        });
+    });
+}
+function prepareAdd(obj) {
+    $(obj).hide();
+    var f = obj.parentNode.parentNode;
+    $.each(f.getElementsByTagName("INPUT"), function () {
+        $(this).val("");
+    });
+    $(f).find("button[formrole='add']").show();
+    $('#' + f.getAttribute("target") + ' tbody tr.selected').removeClass("selected");
+}
+var currenttable = null;
+var currform = null;
+var currformid = "";
+function addRecord(obj) {
+    var dbt = $(obj).attr("db");
+    var frm = $(obj).attr("target");
+    currformid = frm;
+    currform = $("#" + frm);
+    eval("currenttable = " + $("#" + frm).attr("target") + "_datatable;");
+    var into = "(";
+    var vls = "(";
+    $.each($("#" + frm).find("input"), function () {
+        if ($(this).attr("target") != "ID") {
+            into += "[" + $(this).attr("target") + "],";
+            vls += "'" + $(this).val() + "',";
+        }
+    });
+    into = into.substring(0, into.length - 1) + ")";
+    vls = vls.substring(0, vls.length - 1) + ")";
+    var qvr = "insert into " + dbt + " " + into + " values " + vls;
+    var message = JSON.stringify({ action: 'insertRow', query: qvr, fnc: "refreshTable", table: dbt });
+    ws.send(message);
+}
+function refreshTable(data) {
+    console.log(currenttable);
+    var newData = new Array();
+    var targets = new Array();
+    $.each(currform.find("input"), function () {
+        newData.push($(this).val());
+        targets.push($(this).attr("target"));
+    });
+    newData[0] = data[0].lastid;
+    var rw = currenttable.row.add(newData).invalidate().draw().node();
+    $.each($(rw).find("td"), function (index) {
+        $(this).attr("target", targets[index]);
+    });
+    var oTable = $('#' + currform.attr("target")).dataTable();
+    oTable.fnPageChange('last');
+    settableRowEvents(currform.attr("target"));
+  
+}

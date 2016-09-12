@@ -32,10 +32,48 @@ Public Class socket_handler
         If msgObj("action") = "changePassword" Then
             Me.Send(passChange(msgObj))
         End If
+        If msgObj("action") = "execQuery" Then
+            Me.Send(execQuery(msgObj))
+        End If
+        If msgObj("action") = "insertRow" Then
+            Me.Send(insertRow(msgObj))
+        End If
     End Sub
+    Public Function execQuery(message As Object) As String
+        Dim connection As New SqlConnection(My.Settings.connstring)
+        Dim command As New SqlCommand(message("query"), connection)
+        command.Connection.Open()
+        command.ExecuteNonQuery()
+        connection.Close()
+        command.Dispose()
+        Return ""
+    End Function
+    Public Function insertRow(message As Object) As String
+        Dim connection As New SqlConnection(My.Settings.connstring)
+        Dim command As New SqlCommand(message("query"), connection)
+        command.Connection.Open()
+        command.ExecuteNonQuery()
+        Dim sql As String = "SELECT IDENT_CURRENT('" & message("table") & "') as 'lastid'"
+        Dim id As Integer = 0
+        command = New SqlCommand(sql, connection)
+        Dim rdr As SqlDataReader = command.ExecuteReader()
+        Dim rstr As String = readerToJson(rdr)
+        Return message("fnc") & "(" & rstr & ");"
+        'While rdr.Read
+        '    id = rdr(0)
+        'End While
+        'sql = "SELECT * from " & message("table") & " WHERE [ID]='" & id & "'"
+        'command = New SqlCommand(sql, connection)
+        'rdr = command.ExecuteReader()
+        'Dim rstr As String = readerToJson(rdr)
+        'rdr.Close()
+        'connection.Close()
+        'connection.Dispose()
+        'Return message("fnc") & "(" & rstr & ");"
+    End Function
     Public Function checkLogin(message As Object) As String
         Dim connection As New SqlConnection(My.Settings.connstring)
-        Dim sql As String = "SELECT * from Users where (email='" & message("email") & "' and password='" & message("password") & "')"
+        Dim sql As String = "Select * from Users where (email='" & message("email") & "' and password='" & message("password") & "')"
         connection.Open()
         Dim command As SqlCommand = New SqlCommand(sql, connection)
         Dim rdr As SqlDataReader = command.ExecuteReader()

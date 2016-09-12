@@ -101,7 +101,7 @@
 <div class="contentContainer admin">
  
     <div class="page" id="admins">
-        <table id="users" addnew="addNewUser();" edit="editUser();" delete="deleteUser();" class="table table-striped table-bordered" cellspacing="0" width="100%">
+        <table id="users" db="Users" frm="userform" class="table table-striped table-bordered" cellspacing="0" width="100%">
             <thead>
                 <tr>
                     <th target="ID">ID</th>
@@ -115,8 +115,9 @@
             </thead>
             <tbody></tbody>
         </table>
-       <div class="datacontent" id="userform">
+       <div class="datacontent" id="userform" target="users">
            <input id="userid" target="ID" style="display:none;" />
+           <center><button type="button"  style="display:none;" formrole="prepareadd" onclick="prepareAdd(this);" class="btn btn-danger">Cancel edit</button></center>
             <div class="form-group col-lg-2 col-md-2 col-sm-2 col-xs-12">
                 <label class="control-label" for="email">Email</label>
                 <input class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="email" target="Email" />
@@ -137,11 +138,20 @@
                <label class="control-label" for="lastname">Last name</label>
                <input class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="lastname" target="LastName" />
            </div>
+           <div class="form-group col-lg-2 col-md-2 col-sm-2 col-xs-12" style="display:none;">
+               <label class="control-label" for="accountype">Account type</label>
+               <input class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="lastname" value="ADMIN" disabled target="AccountType" />
+           </div>
+           <div class="form-group col-lg-2 col-md-2 col-sm-2 col-xs-12">
+               <label class="control-label" style="visibility:hidden;"></label>
+               <button formrole="add"   onclick="addRecord(this);" style="position:absolute;top:17px;" db="Users" type="button" target="userform" class="btn btn-success">Add</button>
+           </div>
       </div>
+      
     </div>
 
     <div class="page" id="groups" style="display:none;">
-        <table id="group_table" class="table table-striped table-bordered" cellspacing="0" width="100%">
+        <table db="Groups" id="group_table" frm="groupform" class="table table-striped table-bordered" cellspacing="0" width="100%">
             <thead>
                 <tr>
                     <th target="Id">ID</th>
@@ -150,5 +160,18 @@
             </thead>
             <tbody></tbody>
         </table>
+        <div class="datacontent" id="groupform" target="group_form">
+            <center><button style="display:none;"  formrole="prepareadd" type="button" onclick="prepareAdd(this);"  class="btn btn-danger">Cancel edit</button></center>
+            <input id="groupid" target="ID" style="display:none;" />
+            <div class="form-group col-lg-2 col-md-2 col-sm-2 col-xs-12">
+                <label class="control-label" for="group_name">Group name</label>
+                <input class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="group_name" target="group_name" />
+            </div>
+            <div class="form-group col-lg-2 col-md-2 col-sm-2 col-xs-12">
+                <label class="control-label" style="visibility:hidden;"></label>
+                <button formrole="add" style="position:absolute;top:17px;"  onclick="addRecord(this);" type="button" db="Groups" target="groupform" class="btn btn-success">Add</button>
+            </div>
+          
+        </div>
     </div>
  </div> 

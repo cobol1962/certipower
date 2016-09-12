@@ -40,8 +40,7 @@
  
  
     <script type="text/javascript" src="https://cdn.datatables.net/v/dt/jszip-2.5.0/pdfmake-0.1.18/dt-1.10.12/b-1.2.2/b-colvis-1.2.2/b-flash-1.2.2/b-html5-1.2.2/b-print-1.2.2/r-2.1.0/se-1.2.0/datatables.min.js"></script>
-
-
+     <script type="text/javascript" src="https://cdn.datatables.net/plug-ins/1.10.12/api/row().show().js"></script>
      <script type="text/javascript" src="https://cdn.jsdelivr.net/sweetalert2/4.2.7/sweetalert2.js"></script>
     <script type="text/javascript" src="jslib/socket.js"></script>
     <div id="tempdiv" style="display:none;"></div>

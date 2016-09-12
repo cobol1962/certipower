@@ -42,13 +42,26 @@ function loginResponse(response) {
     }
 }
 function loadAdmin(page) {
-    $.get("Pages/" + page, function (data) {
+   
+    $.ajax({
+        url: "Pages/" + page,
+        success: function (data) {
+            
+            document.body.innerHTML = data;
+            var s = document.createElement("script");
+            s.type = "text/javascript";
+            s.src = "Pages/scripts/admin.js";
+            $("head").append(s);
+        },
+        cache: false
+    });
+ /*   $.get("Pages/" + page, function (data) {
         document.body.innerHTML = data;
         var s = document.createElement("script");
         s.type = "text/javascript";
         s.src = "Pages/scripts/admin.js";
         $("head").append(s);
-    });
+    });*/
 }
 function changePassword() {
     var html = '<center><form style="width:300px;"><div class="form-group left">'+
