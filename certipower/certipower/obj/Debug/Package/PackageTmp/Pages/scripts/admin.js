@@ -36,6 +36,7 @@ function fillTable(tablename, dta) {
           var tr = document.createElement("TR");
           $.each($("#" + tablename).find("th"), function () {
               var td = document.createElement("TD");
+              td.style.display = this.style.display;
               $(td).html(dta[$(this).attr("target")]);
               td.setAttribute("target", $(this).attr("target"));
               tr.appendChild(td);
@@ -86,11 +87,6 @@ function fillTable(tablename, dta) {
                   " ]" +
                "});");
        
-            /*  var dv = '<div class="dataTables_actions align-h">' +
-               '<button type="button" onclick="' + $("#" + tablename).attr("addnew") + '" class="btn btn-info">Add new</button>' +
-               '<button type="button" onclick="' + $("#" + tablename).attr("edit") + '"  class="btn btn-primary">Edit selected</button>' +
-               '<button type="button" onclick="' + $("#" + tablename).attr("delete") + '"  class="btn btn-danger">Delete selected</button>';
-              $(dv).insertBefore("#" + tablename + "_filter");*/
           }
        
           settableRowEvents(tablename);
@@ -107,9 +103,13 @@ function settableRowEvents(tablename) {
         if ($(this).hasClass('selected')) {
             $(this).removeClass('selected');
             $.each($(this).find("td"), function () {
-                $("input[target='" + $(this).attr("target") + "']").val("");
+             var $_inp = $("input[target='" + $(this).attr("target") + "']");
+                if (!this.disabled) {
+                    $("input[target='" + $(this).attr("target") + "']").val("");
+                }
             });
             $("#" + this.parentNode.parentNode.getAttribute("frm")).find("button[formrole='add']").show();
+            $("#" + this.parentNode.parentNode.getAttribute("frm")).find("button[formrole='delete']").hide();
             $("#" + this.parentNode.parentNode.getAttribute("frm")).find("button[formrole='prepareadd']").hide();
         } else {
             table.$('tr.selected').removeClass('selected');
@@ -118,6 +118,7 @@ function settableRowEvents(tablename) {
                 $("input[target='" + $(this).attr("target") + "']").val(this.innerHTML);
             });
             $("#" + this.parentNode.parentNode.getAttribute("frm")).find("button[formrole='add']").hide();
+            $("#" + this.parentNode.parentNode.getAttribute("frm")).find("button[formrole='delete']").show();
             $("#" + this.parentNode.parentNode.getAttribute("frm")).find("button[formrole='prepareadd']").show();
         }
     });
@@ -156,12 +157,19 @@ function setEvents(formname, tablename, table) {
     });
 }
 function prepareAdd(obj) {
+   
     $(obj).hide();
     var f = obj.parentNode.parentNode;
     $.each(f.getElementsByTagName("INPUT"), function () {
-        $(this).val("");
-    });
+      
+        if (!this.disabled) {
+            $(this).val("");
+        } else {
+            
+        }
+     });
     $(f).find("button[formrole='add']").show();
+    $(f).find("button[formrole='delete']").hide();
     $('#' + f.getAttribute("target") + ' tbody tr.selected').removeClass("selected");
 }
 var currenttable = null;
@@ -188,20 +196,47 @@ function addRecord(obj) {
     ws.send(message);
 }
 function refreshTable(data) {
-    console.log(currenttable);
+  
     var newData = new Array();
     var targets = new Array();
     $.each(currform.find("input"), function () {
         newData.push($(this).val());
         targets.push($(this).attr("target"));
+        if (!this.disabled) {
+            $(this).val("");
+        }
     });
+
     newData[0] = data[0].lastid;
     var rw = currenttable.row.add(newData).invalidate().draw().node();
     $.each($(rw).find("td"), function (index) {
+        var th = document.getElementById(currform.attr("target")).getElementsByTagName("TR")[0].getElementsByTagName("TH")[index];
         $(this).attr("target", targets[index]);
+        this.style.display = th.style.display;
     });
     var oTable = $('#' + currform.attr("target")).dataTable();
     oTable.fnPageChange('last');
     settableRowEvents(currform.attr("target"));
-  
+    
+}
+function deleteRecord(obj) {
+    swal({
+        title: "Are you sure ?",
+        text: "selected record will be deleted permanently !",
+        type: "question",
+        showCancelButton: true
+    }).then(function () {
+        var qvr = "delete from " + $(obj).attr("db") + " where [ID]='" + $("#" + $(obj).attr("target") + " input[target='ID']").val() + "'";
+        var message = JSON.stringify({ action: 'execQuery', query: qvr, fnc: "recordDeleted('" + $("#" + $(obj).attr("target")).attr("target") + "');" });
+        ws.send(message);
+    });
+}
+function recordDeleted(tb) {
+    swal({
+        title: "Success ",
+        text: "Delete succesfull ",
+        type:"success"
+    });
+    eval("var table = " + tb + "_datatable");
+    table.row('.selected').remove().draw(false);
 }

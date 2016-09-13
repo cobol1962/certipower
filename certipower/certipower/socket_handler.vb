@@ -46,7 +46,7 @@ Public Class socket_handler
         command.ExecuteNonQuery()
         connection.Close()
         command.Dispose()
-        Return ""
+        Return message("fnc")
     End Function
     Public Function insertRow(message As Object) As String
         Dim connection As New SqlConnection(My.Settings.connstring)

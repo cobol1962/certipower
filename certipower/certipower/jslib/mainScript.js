@@ -50,7 +50,7 @@ function loadAdmin(page) {
             document.body.innerHTML = data;
             var s = document.createElement("script");
             s.type = "text/javascript";
-            s.src = "Pages/scripts/admin.js";
+            s.src = "Pages/scripts/admin.js?v=" + new Date().getTime();
             $("head").append(s);
         },
         cache: false
