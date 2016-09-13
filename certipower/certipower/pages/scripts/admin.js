@@ -120,6 +120,8 @@ function settableRowEvents(tablename) {
             $("#" + this.parentNode.parentNode.getAttribute("frm")).find("button[formrole='add']").hide();
             $("#" + this.parentNode.parentNode.getAttribute("frm")).find("button[formrole='delete']").show();
             $("#" + this.parentNode.parentNode.getAttribute("frm")).find("button[formrole='prepareadd']").show();
+            eval("currenttable = " + tablename + "_datatable");
+            eval($("#" + tablename).attr("afterselect") + ";");
         }
     });
 }
@@ -175,8 +177,11 @@ function prepareAdd(obj) {
 var currenttable = null;
 var currform = null;
 var currformid = "";
+var lastInsertedId = "";
+var afterInsert = "";
 function addRecord(obj) {
     var dbt = $(obj).attr("db");
+    afterInsert = $(obj).attr('after');
     var frm = $(obj).attr("target");
     currformid = frm;
     currform = $("#" + frm);
@@ -195,6 +200,7 @@ function addRecord(obj) {
     var message = JSON.stringify({ action: 'insertRow', query: qvr, fnc: "refreshTable", table: dbt });
     ws.send(message);
 }
+
 function refreshTable(data) {
   
     var newData = new Array();
@@ -208,6 +214,7 @@ function refreshTable(data) {
     });
 
     newData[0] = data[0].lastid;
+    lastInsertedId = data[0].lastid;
     var rw = currenttable.row.add(newData).invalidate().draw().node();
     $.each($(rw).find("td"), function (index) {
         var th = document.getElementById(currform.attr("target")).getElementsByTagName("TR")[0].getElementsByTagName("TH")[index];
@@ -217,7 +224,7 @@ function refreshTable(data) {
     var oTable = $('#' + currform.attr("target")).dataTable();
     oTable.fnPageChange('last');
     settableRowEvents(currform.attr("target"));
-    
+    eval(afterInsert);
 }
 function deleteRecord(obj) {
     swal({
@@ -239,4 +246,51 @@ function recordDeleted(tb) {
     });
     eval("var table = " + tb + "_datatable");
     table.row('.selected').remove().draw(false);
+}
+function setGroupPrivileges() {
+    var message = JSON.stringify({ action: 'setGroupPrivileges', groupid: lastInsertedId });
+    ws.send(message);
+}
+function show(data) {
+    console.log(data);
+}
+function displayPrivilegTable() {
+    var ww = setInterval(function () {
+        try {
+            clearInterval(ww);
+            var dta = currenttable.row('.selected').data();
+            var qvr = "select Group_Privileges.*,Privileges.name from Group_Privileges inner join  Privileges on Group_Privileges.privileg_id =  Privileges.ID   where  Group_Privileges.group_id='" + dta[0] + "'";
+            var message = JSON.stringify({ action: 'getTableData', query: qvr, fnc: "showPrivileges" });
+            ws.send(message);
+        } catch (err) {
+
+        }
+    },50);
+}
+function showPrivileges(dta) {
+    var data = $.parseJSON(dta);
+    document.getElementById("privilegbody").innerHTML = "";
+    $.each(data, function () {
+        var dt = this;
+        var tr = document.createElement("tr");
+        $.each(document.getElementById("privileges").getElementsByTagName("TH"), function () {
+            var td = document.createElement("td");
+            td.setAttribute("target", this.getAttribute("target"));
+            if (!this.hasAttribute("checkbox")) {
+                td.innerHTML = dt[this.getAttribute("target")];
+            } else {
+                td.innerHTML = "<input onchange='changePrivileg(this);' privileg_id='" + dt["privileg_id"] + "' group_id='" + dt["group_id"] + "' target='" + this.getAttribute("target") + "' type='checkbox' " + ((dt[this.getAttribute("target")] == "1") ? "checked" : "") + "/>";
+
+            }
+            td.style.display = this.style.display;
+            tr.appendChild(td);
+        });
+        document.getElementById("privilegbody").appendChild(tr);
+    })
+}
+function changePrivileg(elm) {
+    var qvr = "update Group_Privileges set [" + elm.getAttribute("target") + "]='" + ((elm.checked) ? "1" : "0") + "' where (group_id='" + elm.getAttribute("group_id") + "' and  privileg_id='" + elm.getAttribute("privileg_id") + "')";
+   
+    var message = JSON.stringify({ action: 'execQuery', query: qvr, fnc: "" });
+    ws.send(message);
 }
