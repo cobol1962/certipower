@@ -15,6 +15,24 @@ Auto-generated field.
 To modify move field declaration from designer file to code-behind file.
 </remarks>
 </member>
+<member name="F:certipower._Default._AjaxFileUpload1">
+<summary>
+AjaxFileUpload1 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:certipower._Default._ScriptManager1">
+<summary>
+ScriptManager1 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
 <member name="T:certipower.My.MyWebExtension">
  <summary>
  Module used to define the properties that are available in the My Namespace for Web projects.

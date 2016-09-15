@@ -38,3 +38,4 @@ D:\certipower\certipower\certipower\obj\Debug\certipower.dll
 D:\certipower\certipower\certipower\obj\Debug\certipower.xml
 D:\certipower\certipower\certipower\obj\Debug\certipower.pdb
 D:\certipower\certipower\certipower\obj\Debug\certipower.vbprojResolveAssemblyReference.cache
+D:\certipower\certipower\certipower\bin\AjaxControlToolkit.dll

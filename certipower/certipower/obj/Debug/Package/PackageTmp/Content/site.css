@@ -211,3 +211,18 @@ table.dataTable tbody>tr.selected, table.dataTable tbody>tr>.selected {
      padding-top:5px;
     box-shadow: 10px 10px 5px rgba(102, 102, 255,.5);
 }
+input {
+    display: inline-block;
+    padding: 6px 12px;
+    margin-bottom: 0;
+    font-size: 14px;
+    font-weight: normal;
+    line-height: 1.428571429;
+    text-align: left;
+    white-space: nowrap;
+    vertical-align: middle;
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    -webkit-user-select: none;
+}

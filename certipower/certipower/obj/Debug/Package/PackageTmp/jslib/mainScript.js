@@ -47,7 +47,7 @@ function loadAdmin(page) {
         url: "Pages/" + page,
         success: function (data) {
             
-            document.body.innerHTML = data;
+            document.getElementById("pages").innerHTML = data;
             var s = document.createElement("script");
             s.type = "text/javascript";
             s.src = "Pages/scripts/admin.js?v=" + new Date().getTime();
@@ -55,13 +55,7 @@ function loadAdmin(page) {
         },
         cache: false
     });
- /*   $.get("Pages/" + page, function (data) {
-        document.body.innerHTML = data;
-        var s = document.createElement("script");
-        s.type = "text/javascript";
-        s.src = "Pages/scripts/admin.js";
-        $("head").append(s);
-    });*/
+ 
 }
 function changePassword() {
     var html = '<center><form style="width:300px;"><div class="form-group left">'+
@@ -90,8 +84,8 @@ function changePassword() {
                 var ok = true;
                 var err = "";
               $("#errormessage").html("");
-                var usr = $.parseJSON(localStorage.user);
-                if ($("#oldpassword").val() != usr.Password) {
+              var usr = $.parseJSON(localStorage.user);
+                if ($("#oldpassword").val() != usr.password) {
                     ok = false;
                     err = "Old password incorrect !";
                 }

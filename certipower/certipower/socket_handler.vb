@@ -41,6 +41,9 @@ Public Class socket_handler
         If msgObj("action") = "setGroupPrivileges" Then
             Me.Send(setGroupPrivileges(msgObj))
         End If
+        If msgObj("action") = "addGroupUser" Then
+            Me.Send(addGroupUser(msgObj))
+        End If
         If msgObj("action") = "getTableData" Then
             Me.Send(getTableData(msgObj))
         End If
@@ -79,7 +82,7 @@ Public Class socket_handler
     End Function
     Public Function checkLogin(message As Object) As String
         Dim connection As New SqlConnection(My.Settings.connstring)
-        Dim sql As String = "Select * from Users where (email='" & message("email") & "' and password='" & message("password") & "')"
+        Dim sql As String = "Select * from Group_Users where (email='" & message("email") & "' and password='" & message("password") & "')"
         connection.Open()
         Dim command As SqlCommand = New SqlCommand(sql, connection)
         Dim rdr As SqlDataReader = command.ExecuteReader()
@@ -91,7 +94,7 @@ Public Class socket_handler
     End Function
     Public Function loadTable(message As Object) As String
         Dim connection As New SqlConnection(My.Settings.connstring)
-        Dim sql As String = "SELECT * from " & message("tableid") & " order by 'ID'"
+        Dim sql As String = "SELECT * from " & message("tableid") & " " & message("where") & " order by 'ID'"
         connection.Open()
         Dim command As SqlCommand = New SqlCommand(sql, connection)
         Dim rdr As SqlDataReader = command.ExecuteReader()
@@ -115,7 +118,7 @@ Public Class socket_handler
     End Function
     Public Function passChange(message As Object)
         Dim connection As New SqlConnection(My.Settings.connstring)
-        Dim command As New SqlCommand("update Users set password='" & message("newpassword") & "' where ID='" & message("id") & "'", connection)
+        Dim command As New SqlCommand("update Group_Users set password='" & message("newpassword") & "' where ID='" & message("id") & "'", connection)
         command.Connection.Open()
         command.ExecuteNonQuery()
         connection.Close()
@@ -160,6 +163,14 @@ Public Class socket_handler
         End While
         'Return "alert('insert into Group_Privileges (group_id,privileg_id) VALUES ('" & idg & "','" & rdr("ID") & "')';"
         Return "show('" & rstr & "');"
+    End Function
+    Public Function addGroupUser(message As Object) As String
+        Dim connection As New SqlConnection(My.Settings.connstring)
+        Dim sql As String = "insert into Users (id) values ('" & message("userid") & "')"
+        connection.Open()
+        Dim command As SqlCommand = New SqlCommand(sql, connection)
+        command.ExecuteNonQuery()
+        Return ""
     End Function
     Public Sub sendToAll(ByVal msg As String)
         For Each item In clients
