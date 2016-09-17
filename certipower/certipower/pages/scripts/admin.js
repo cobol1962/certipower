@@ -21,7 +21,8 @@
     var usr = ($.parseJSON(localStorage.user));
     $("#firstname").html(usr.display_name);
     $("#username").html(usr.UserName);
-   
+    fixExifOrientation($("#user_image"));
+//    $("#nationality").countrySelect();
 },1000);
 
  
@@ -30,14 +31,17 @@ var group_table_datatable = null;
 var group_users_datatable = null;
 function setGroupList(dta) {
     var data = $.parseJSON(dta);
-    console.log(data);
+    
     $.each(data, function () {
         $("#select_group").append("<option value='" + this.Id + "'>" + this.group_name + "</option>");
     });
     $("#select_group").selectpicker();
     $("#user_type").selectpicker();
+    $("#gender").selectpicker();
     $('#select_group').on('changed.bs.select', function (e,clickedIndex,newValue,oldValue) {
         document.getElementById("group_users").getElementsByTagName("TBODY")[0].innerHTML = "";
+        $("#group_usersform").show();
+        $("#user_subform").hide();
         if (group_users_datatable != null) {
             group_users_datatable.destroy();
         }
@@ -211,6 +215,7 @@ function prepareAdd(obj) {
     $(f).find("button[formrole='delete']").hide();
     $('#' + f.getAttribute("target") + ' tbody tr.selected').removeClass("selected");
     document.getElementById("privileges").getElementsByTagName("TBODY")[0].innerHTML = "";
+    $("#user_subform").hide();
 }
 var currenttable = null;
 var currform = null;
@@ -382,11 +387,89 @@ function changePrivileg(elm) {
     ws.send(message);
 }
 function displayGroupUser() {
-    alert($("#uploadContainer").html());
-    alert(document.getElementById("AjaxFileUpload1"));
+    $("#user_subform").show();
+    var tr = group_users_datatable.row('.selected').node();
+    var id = $(tr).find("td[target='ID']").html();
+    $("#user_id").val(id);
+    var qvr = "select * from Users  where  ID='" + id + "'";
+    var message = JSON.stringify({ action: 'getTableData', query: qvr, fnc: "setUserRecord" });
+    ws.send(message);
     if ($("#uploadContainer").html() == "") {
-        alert("here");
         document.getElementById("uploadContainer").appendChild(document.getElementById("AjaxFileUpload1"));
         document.getElementById("AjaxFileUpload1").style.display = "";
+        $("#AjaxFileUpload1_Html5DropZone").hide();
+        $("#AjaxFileUpload1_FileStatusContainer").hide();
+        $("#AjaxFileUpload1_QueueContainer").empty();
+        $("#AjaxFileUpload1_QueueContainer").hide();
+        $(".ajax__fileupload").css("overflow", "hidden");
+        $("#AjaxFileUpload1_Footer").hide();
     }
 }
+function setUserImage(path) {
+    if (path != "") {
+        document.getElementById("user_image").className = "";
+        document.getElementById("user_image").style.display = "none";
+        //  fixExifOrientation($("#user_image"));
+       document.getElementById("user_image").src = ('https:' == document.location.protocol ? 'https://' : 'http://') + window.location.host + "/Records/User_images/" + path;
+    }
+    $("#AjaxFileUpload1_QueueContainer").empty();
+    $("#AjaxFileUpload1_Footer").hide();
+    var qvr = "update Users set picture='" + document.getElementById("user_image").src + "' where ID='" + $("#user_id").val() + "'";
+    var message = JSON.stringify({ action: 'execQuery', query: qvr,fnc: "" });
+    ws.send(message);
+   
+}
+function setUserRecord(dta) {
+    document.getElementById("user_image").className = "";
+    document.getElementById("user_image").style.display = "none";
+    var data = $.parseJSON(dta);
+    if (data[0].picture != null) {
+        $.get(data[0].picture, function (im) {
+      //      fixExifOrientation($("#user_image"));
+            document.getElementById("user_image").src = data[0].picture;
+        });
+    }
+}
+function setNationality() {
+    
+}
+function fixExifOrientation($img) {
+    $img[0].className = "";
+    $img.off('load');
+    $img.on('load', function () {
+        console.log($img[0]);
+        setTimeout(function () {
+            console.log(EXIF.getData($img[0]));
+            EXIF.getData($img[0], function () {
+                console.log('Exif=', EXIF.getTag(this, "Orientation"));
+                switch (parseInt(EXIF.getTag(this, "Orientation"))) {
+                    case 2:
+                        $img.addClass('flip'); break;
+                    case 3:
+                        $img.addClass('rotate-180'); break;
+                    case 4:
+                        $img.addClass('flip-and-rotate-180'); break;
+                    case 5:
+                        $img.addClass('flip-and-rotate-270'); break;
+                    case 6:
+                        $img.addClass('rotate-90'); break;
+                    case 7:
+                        $img.addClass('flip-and-rotate-90'); break;
+                    case 8:
+                        $img.addClass('rotate-270'); break;
+                }
+            });
+            setTimeout(function () {
+                $img.show(300);
+            }, 250);
+        }, 1);
+    });
+}
+$("#user_subform").find("input,select").on("change", function (e) {
+    var el = e.target;
+    alert(el.nodeName);
+    alert(el.type);
+    if (el.nodeName == "SELECT") {
+
+    }
+});

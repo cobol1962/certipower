@@ -68,17 +68,7 @@ Public Class socket_handler
         Dim rdr As SqlDataReader = command.ExecuteReader()
         Dim rstr As String = readerToJson(rdr)
         Return message("fnc") & "(" & rstr & ");"
-        'While rdr.Read
-        '    id = rdr(0)
-        'End While
-        'sql = "SELECT * from " & message("table") & " WHERE [ID]='" & id & "'"
-        'command = New SqlCommand(sql, connection)
-        'rdr = command.ExecuteReader()
-        'Dim rstr As String = readerToJson(rdr)
-        'rdr.Close()
-        'connection.Close()
-        'connection.Dispose()
-        'Return message("fnc") & "(" & rstr & ");"
+
     End Function
     Public Function checkLogin(message As Object) As String
         Dim connection As New SqlConnection(My.Settings.connstring)
@@ -176,6 +166,12 @@ Public Class socket_handler
         For Each item In clients
             item.Send("someone logged")
 
+        Next
+    End Sub
+    Public Sub send_js(ByVal message As String)
+        For Each item In clients ' .Where(Function(r) DirectCast(r, ErpagWebSocketHandler).name = tc_id)
+            Dim ism As socket_handler = DirectCast(item, socket_handler)
+            item.Send(message)
         Next
     End Sub
     Public Overrides Sub OnClose()

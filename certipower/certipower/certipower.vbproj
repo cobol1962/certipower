@@ -123,6 +123,7 @@
     <Folder Include="jslib\sections\" />
     <Folder Include="jslib\site\" />
     <Folder Include="Models\" />
+    <Folder Include="Records\User_images\" />
   </ItemGroup>
   <ItemGroup>
     <Import Include="Microsoft.VisualBasic" />
@@ -2025,6 +2026,7 @@
     <Content Include="Content\bootstrap-theme.min.css" />
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
+    <Content Include="Content\countrySelect.css" />
     <Content Include="Content\font-awesome.css" />
     <Content Include="Content\font-awesome.min.css" />
     <Content Include="Content\navbar.css" />
@@ -2034,6 +2036,7 @@
     <Content Include="Default.aspx" />
     <Content Include="images\coming-soon.jpg" />
     <Content Include="images\dashboard-header.jpg" />
+    <Content Include="images\flags.png" />
     <Content Include="images\landing\apps-calendar.png" />
     <Content Include="images\landing\apps-mailbox.png" />
     <Content Include="images\landing\apps-media.png" />
@@ -2078,6 +2081,7 @@
     <Content Include="fonts\fontawesome-webfont.woff" />
     <Content Include="fonts\fontawesome-webfont.ttf" />
     <Content Include="fonts\fontawesome-webfont.eot" />
+    <Content Include="images\squares.gif" />
     <Content Include="images\Thumbs.db" />
     <Content Include="Content\AppAssets\fonts\glyphicons-halflings-regular.eot" />
     <Content Include="Content\AppAssets\fonts\glyphicons-halflings-regular.ttf" />
@@ -2152,10 +2156,13 @@
     <Content Include="Content\assets\vendor\slick-carousel\fonts\slick.woff" />
     <Content Include="Content\assets\vendor\toastr\toastr.js.map" />
     <None Include="Scripts\jquery-3.1.0.intellisense.js" />
+    <Content Include="jslib\base64.js" />
     <Content Include="jslib\components.js" />
     <Content Include="jslib\components.min.js" />
     <Content Include="jslib\core.js" />
     <Content Include="jslib\core.min.js" />
+    <Content Include="jslib\countrySelect.js" />
+    <Content Include="jslib\exif.js" />
     <Content Include="jslib\mainScript.js" />
     <Content Include="jslib\site.js" />
     <Content Include="jslib\site.min.js" />

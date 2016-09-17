@@ -15,16 +15,26 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/jszip-2.5.0/pdfmake-0.1.18/dt-1.10.12/b-1.2.2/b-colvis-1.2.2/b-flash-1.2.2/b-html5-1.2.2/b-print-1.2.2/r-2.1.0/se-1.2.0/datatables.min.css" />
     <link rel="stylesheet" type="text/css" href="Content/site.css" />
 
-
+     <link rel="stylesheet" type="text/css" href="Content/countrySelect.css" />
     <script type="text/javascript" src="Scripts/jquery-3.1.0.js"></script>
     <script type="text/javascript" src="Scripts/bootstrap.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.11.2/js/bootstrap-select.min.js"></script>
     <script type="text/javascript" src="jslib/MainScript.js"></script>
-
+    <script type="text/javascript">
+        function uploadStarted() {
+            document.getElementById("user_image").src = "images/squares.gif";
+        }
+        function uploadCompleted(seneder, args) {
+           setUserImage(args._fileName);
+        }
+    </script>
 </head>
 <body>
     <form id="form1" runat="server">
-        <ajaxToolkit:AjaxFileUpload Style="display: none;" ID="AjaxFileUpload1" runat="server" />
+
+        <ajaxToolkit:AjaxFileUpload ID="AjaxFileUpload1" onchange="$('.ajax__fileupload_uploadbutton').trigger('click');" style="display:none;overflow:hidden;" runat="server" AllowedFileTypes="jpg,jpeg,gif,png,svg"
+                            MaximumNumberOfFiles="10" OnUploadComplete="File_Upload" BorderStyle="None" AutoStartUpload="True" OnClientUploadStart="uploadStarted" OnClientUploadComplete="uploadCompleted" />
+
         <div id="pages">
             <div class="contentContainer login">
                 <div class="loginbox align-both rounded">
@@ -54,6 +64,9 @@
     <script type="text/javascript" src="https://cdn.datatables.net/v/dt/jszip-2.5.0/pdfmake-0.1.18/dt-1.10.12/b-1.2.2/b-colvis-1.2.2/b-flash-1.2.2/b-html5-1.2.2/b-print-1.2.2/r-2.1.0/se-1.2.0/datatables.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/plug-ins/1.10.12/api/row().show().js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/sweetalert2/4.2.7/sweetalert2.js"></script>
+      <script type="text/javascript" src="jslib/countrySelect.js"></script>
+       <script type="text/javascript" src="jslib/base64.js"></script>
+       <script type="text/javascript" src="jslib/exif.js"></script>
     <script type="text/javascript" src="jslib/socket.js"></script>
     <div id="tempdiv" style="display: none;"></div>
 </body>
