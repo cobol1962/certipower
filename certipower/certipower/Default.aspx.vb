@@ -14,7 +14,7 @@ Public Class _Default
     Protected Sub File_Upload(sender As Object, e As AjaxFileUploadEventArgs)
 
         Dim filename As String = e.FileName
-        Dim strDestPath As String = Server.MapPath("~/Records/User_Images/")
+        Dim strDestPath As String = Server.MapPath("~/Data/User_Images/")
         AjaxFileUpload1.SaveAs(strDestPath & filename)
 
     End Sub

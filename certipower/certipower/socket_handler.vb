@@ -47,7 +47,9 @@ Public Class socket_handler
         If msgObj("action") = "getTableData" Then
             Me.Send(getTableData(msgObj))
         End If
+
     End Sub
+
     Public Function execQuery(message As Object) As String
         Dim connection As New SqlConnection(My.Settings.connstring)
         Dim command As New SqlCommand(message("query"), connection)

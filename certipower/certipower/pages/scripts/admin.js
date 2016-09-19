@@ -29,19 +29,30 @@
 var users_datatable = null;
 var group_table_datatable = null;
 var group_users_datatable = null;
+function prepareSetGroups() {
+    $('#select_group').off('changed.bs.select');
+    $('#select_group').html("");
+    var message = JSON.stringify({ action: 'getTableData', query: "select * from Groups order by group_name", fnc: "setGroupList" });
+    ws.send(message);
+}
 function setGroupList(dta) {
     var data = $.parseJSON(dta);
-    
+    //if (group_users_datatable != null) {
+    //    group_users_datatable.destroy();
+    //}
     $.each(data, function () {
+      
         $("#select_group").append("<option value='" + this.Id + "'>" + this.group_name + "</option>");
     });
     $("#select_group").selectpicker();
+    $("#select_group").selectpicker("refresh");
     $("#user_type").selectpicker();
     $("#gender").selectpicker();
     $('#select_group').on('changed.bs.select', function (e,clickedIndex,newValue,oldValue) {
         document.getElementById("group_users").getElementsByTagName("TBODY")[0].innerHTML = "";
         $("#group_usersform").show();
         $("#user_subform").hide();
+      
         if (group_users_datatable != null) {
             group_users_datatable.destroy();
         }
@@ -52,6 +63,7 @@ function setGroupList(dta) {
 }
 function fillTable(tablename, dta) {
     var data = $.parseJSON(dta);
+  
     document.getElementById(tablename).getElementsByTagName("TBODY")[0].innerHTML = "";
     var nmb = data.length;
       var done = 0;
@@ -345,7 +357,6 @@ function addUser() {
     ws.send(message);
 }
 function show(data) {
-    console.log(data);
 }
 function displayPrivilegTable() {
     var ww = setInterval(function () {
@@ -410,7 +421,7 @@ function setUserImage(path) {
         document.getElementById("user_image").className = "";
         document.getElementById("user_image").style.display = "none";
         //  fixExifOrientation($("#user_image"));
-       document.getElementById("user_image").src = ('https:' == document.location.protocol ? 'https://' : 'http://') + window.location.host + "/Records/User_images/" + path;
+       document.getElementById("user_image").src = ('https:' == document.location.protocol ? 'https://' : 'http://') + window.location.host + "/Data/User_Images/" + path;
     }
     $("#AjaxFileUpload1_QueueContainer").empty();
     $("#AjaxFileUpload1_Footer").hide();
@@ -429,6 +440,21 @@ function setUserRecord(dta) {
             document.getElementById("user_image").src = data[0].picture;
         });
     }
+    $.each($("#user_subform").find("input,select"), function () {
+        if (this.type != "file") {
+            if (this.nodeName != "SELECT") {
+                $(this).val(data[0][$(this).attr("target")]);
+            }
+            if (this.nodeName == "SELECT") {
+                $(this).val(data[0][$(this).attr("target")]);
+                $("#" + this.id).selectpicker("refresh");
+            }
+            if (this.type == "checkbox") {
+                $(this).checked = ((data[0][$(this).attr("target")] == "1") ? true : false);
+              
+            }
+        }
+    });
 }
 function setNationality() {
     
@@ -467,9 +493,26 @@ function fixExifOrientation($img) {
 }
 $("#user_subform").find("input,select").on("change", function (e) {
     var el = e.target;
-    alert(el.nodeName);
-    alert(el.type);
+  
     if (el.nodeName == "SELECT") {
-
+        var qvr = "update users set " + $(el).attr("target") + "='" + $(el).val() + "' where ID='" + $("#user_id").val() + "'";
+        var message = JSON.stringify({ action: 'execQuery', query: qvr, fnc: "" });
+        ws.send(message);
+    }
+    if (el.nodeName == "INPUT" && el.type == "text") {
+        var qvr = "update users set " + $(el).attr("target") + "='" + $(el).val() + "' where ID='" + $("#user_id").val() + "'";
+       
+        var message = JSON.stringify({ action: 'execQuery', query: qvr, fnc: "" });
+        ws.send(message);
+    }
+    if (el.nodeName == "INPUT" && el.type == "checkbox") {
+        var qvr = "update users set " + $(el).attr("target") + "='" + ((el.checked) ? "1" : "0") + "' where ID='" + $("#user_id").val() + "'";
+        var message = JSON.stringify({ action: 'execQuery', query: qvr, fnc: "" });
+        ws.send(message);
     }
 });
+function addFolder(parent,elm) {
+    document.getElementById("wheretogo").value = "Records/" + parent + "/" + elm;
+    var message = JSON.stringify({ action: 'createFolder', parent:parent,name: elm, fnc: "document.getElementById('folderFrame').src='folders.aspx';" });
+    ws.send(message);
+}

@@ -2034,6 +2034,7 @@
     <Content Include="Content\site.min.css" />
     <Content Include="Content\sweetalert.css" />
     <Content Include="Default.aspx" />
+    <Content Include="folders.aspx" />
     <Content Include="images\coming-soon.jpg" />
     <Content Include="images\dashboard-header.jpg" />
     <Content Include="images\flags.png" />
@@ -2192,6 +2193,13 @@
     </Compile>
     <Compile Include="Default.aspx.vb">
       <DependentUpon>Default.aspx</DependentUpon>
+      <SubType>ASPXCodebehind</SubType>
+    </Compile>
+    <Compile Include="folders.aspx.designer.vb">
+      <DependentUpon>folders.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="folders.aspx.vb">
+      <DependentUpon>folders.aspx</DependentUpon>
       <SubType>ASPXCodebehind</SubType>
     </Compile>
     <Compile Include="My Project\AssemblyInfo.vb" />
