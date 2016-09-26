@@ -11,12 +11,15 @@ Imports System.IO
 Public Class socket_handler
     Inherits WebSocketHandler
     Public myID As String
+    Private Shared currentClient As socket_handler
     Private Shared clients As New WebSocketCollection()
+    Public  currentUploadFolder As String
     Public Sub New()
 
     End Sub
     Public Overrides Sub OnOpen()
         clients.Add(Me)
+        currentClient = Me
         '  Me.Send("websocket ok connected")
     End Sub
     Public Overrides Sub OnMessage(ByVal message As String)
@@ -48,7 +51,19 @@ Public Class socket_handler
             Me.Send(getTableData(msgObj))
         End If
 
+        If msgObj("action") = "moveUploadedFile" Then
+            Me.Send(moveUploadedFile(msgObj))
+        End If
     End Sub
+    Public Function moveUploadedFile(message As Object)
+        Using _testData As StreamWriter = New StreamWriter(HttpContext.Current.Server.MapPath("~/Records/data.txt"), True)
+            _testData.WriteLine("csf = " & message("currentUploadFolder") & " //// " & message("fname"))
+        End Using
+        Dim p1 As String = HttpContext.Current.Server.MapPath("~/Records/" & message("fname"))
+        Dim p2 As String = HttpContext.Current.Server.MapPath("~/Records/" & message("currentUploadFolder") & "/" & message("fname"))
+        File.Move(p1, p2)
+        Return ""
+    End Function
 
     Public Function execQuery(message As Object) As String
         Dim connection As New SqlConnection(My.Settings.connstring)
@@ -171,10 +186,8 @@ Public Class socket_handler
         Next
     End Sub
     Public Sub send_js(ByVal message As String)
-        For Each item In clients ' .Where(Function(r) DirectCast(r, ErpagWebSocketHandler).name = tc_id)
-            Dim ism As socket_handler = DirectCast(item, socket_handler)
-            item.Send(message)
-        Next
+        currentClient.Send(message)
+
     End Sub
     Public Overrides Sub OnClose()
         MyBase.OnClose()

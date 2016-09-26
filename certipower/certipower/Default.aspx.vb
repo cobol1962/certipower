@@ -18,5 +18,20 @@ Public Class _Default
         AjaxFileUpload1.SaveAs(strDestPath & filename)
 
     End Sub
+    Protected Sub File_Upload2(sender As Object, e As AjaxFileUploadEventArgs)
+
+
+        Dim filename As String = e.FileName
+        Dim strDestPath As String = Server.MapPath("~/Notes/")
+        AjaxFileUpload2.SaveAs(strDestPath & filename.Replace(" ", "_"))
+
+    End Sub
+    Protected Sub File_Upload3(sender As Object, e As AjaxFileUploadEventArgs)
+
+        Dim filename As String = e.FileName
+
+        Dim strDestPath As String = Server.MapPath("~/Records/")
+        AjaxFileUpload3.SaveAs(strDestPath & filename.Replace(" ", "_"))
+    End Sub
 
 End Class

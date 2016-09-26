@@ -3,6 +3,8 @@
    ws.send(message);
    var message = JSON.stringify({ action: 'getTableData', query: "select * from Groups order by group_name", fnc: "setGroupList" });
    ws.send(message);
+   var message = JSON.stringify({ action: 'loadTable', tableid: "Records", fnc: "fillTable", where: "", tablename: "records_table" });
+   ws.send(message);
     $('.navbar a.dropdown-toggle').on('click', function (e) {
         var elmnt = $(this).parent().parent();
         if (!elmnt.hasClass('nav')) {
@@ -22,6 +24,8 @@
     $("#firstname").html(usr.display_name);
     $("#username").html(usr.UserName);
     fixExifOrientation($("#user_image"));
+    prepareRecordsForm();
+  
 //    $("#nationality").countrySelect();
 },1000);
 
@@ -29,6 +33,7 @@
 var users_datatable = null;
 var group_table_datatable = null;
 var group_users_datatable = null;
+var records_table_datatable = null;
 function prepareSetGroups() {
     $('#select_group').off('changed.bs.select');
     $('#select_group').html("");
@@ -41,8 +46,7 @@ function setGroupList(dta) {
     //    group_users_datatable.destroy();
     //}
     $.each(data, function () {
-      
-        $("#select_group").append("<option value='" + this.Id + "'>" + this.group_name + "</option>");
+       $("#select_group").append("<option value='" + this.Id + "'>" + this.group_name + "</option>");
     });
     $("#select_group").selectpicker();
     $("#select_group").selectpicker("refresh");
@@ -79,6 +83,17 @@ function fillTable(tablename, dta) {
                   if (this.getAttribute("type") == "select") {
                       $(td).html($("#" + this.getAttribute("selectid")).find("option[value='" + dta[$(this).attr("target")] + "']").text());
                   }
+              
+                  if (this.getAttribute("type") == "date") {
+                      $(td).attr("realvalue", dta[$(this).attr("target")].split("T")[0]);
+                      var dt = new Date(dta[$(this).attr("target")].split("T")[0]);
+                      var n = dt.toLocaleString();
+                      $(td).html(n.split(" ")[0]);
+                  }
+               
+              }
+              if (this.hasAttribute("action")) {
+                  $(td).attr("action", this.getAttribute("action"));
               }
               td.setAttribute("target", $(this).attr("target"));
               tr.appendChild(td);
@@ -134,6 +149,7 @@ function fillTable(tablename, dta) {
           setEvents("userform","users",users_datatable);
           setEvents("groupform", "group_table", group_table_datatable);
           setEvents("group_usersform", "group_users", group_users_datatable);
+          setEvents("records_form", "records_table", records_table_datatable);
       }, 100);
     
 }
@@ -161,25 +177,32 @@ function settableRowEvents(tablename) {
                 var ths = this;
                 $.each($("select[target='" + $(this).attr("target") + "']").find("option"), function () {
                     if ($(this).html() == ths.innerHTML) {
-                      $("select[target='" + $(ths).attr("target") + "']").val($(this).attr("value"));
+                        $("select[target='" + $(ths).attr("target") + "']").val($(this).attr("value"));
                     }
                 });
+                if (this.hasAttribute("realvalue")) {
+                    $("input[target='" + $(this).attr("target") + "']").val($(this).attr("realvalue"));
+                }
+                if (this.hasAttribute("action")) {
+                    eval(this.getAttribute("action"));
+                }
                 $("select[target='" + $(this).attr("target") + "']").selectpicker("refresh");
             });
             $("#" + this.parentNode.parentNode.getAttribute("frm")).find("button[formrole='add']").hide();
             $("#" + this.parentNode.parentNode.getAttribute("frm")).find("button[formrole='delete']").show();
             $("#" + this.parentNode.parentNode.getAttribute("frm")).find("button[formrole='prepareadd']").show();
+            document.getElementById("notesframe").href = "http://docs.google.com/gview?url=" + window.location.host +  "/Notes/" + $("#notes").val();
             eval("currenttable = " + tablename + "_datatable");
             eval($("#" + tablename).attr("afterselect") + ";");
         }
     });
 }
 function setEvents(formname, tablename, table) {
-  
+   
     $.each($("#" + formname).find("input,select"), function () {
         $(this).unbind("change");
         $(this).bind("change", function (e) {
-            
+         
             if ($("#" + formname + " input[target='" + "ID" + "']").val() == "") {
                 return false;
             }
@@ -195,16 +218,25 @@ function setEvents(formname, tablename, table) {
             }
             var newData = new Array();
             $.each($("#" + tablename + " tbody tr.selected td"), function () {
-                newData.push($(this).html());
+                if (this.hasAttribute("realvalue")) {
+                    this.setAttribute("realvalue", $(this).html());
+                    $(this).html(new Date($(this).html()).toLocaleString().split(" ")[0]);
+                    newData.push($(this).html());
+                } else {
+                    newData.push($(this).html());
+                }
             });
             table
              .row(trr)
              .data(newData)
              .draw( false )
              .show();
-           
+            var popup = $find('folderExtender');
+            popup.hidePopup();
+        
+            document.getElementById("notesframe").href = "http://docs.google.com/gview?url=" + window.location.host + "/Notes/" + $("#notes").val();
             var message = JSON.stringify({ action: 'execQuery', query: "update " + $("#" + tablename).attr("db") + " set " + $(e.target).attr("target") + "='" + $(this).val() + "' where ID='" + $("#" + formname + " input[target='" + "ID" + "']").val() + "'",fnc:"" });
-             ws.send(message);
+            ws.send(message);
         });
     });
 }
@@ -237,6 +269,8 @@ var afterInsert = "";
 function addRecord(obj) {
     var dbt = $(obj).attr("db");
     afterInsert = $(obj).attr('after');
+    var popup = $find('folderExtender');
+    popup.hidePopup();
     var frm = $(obj).attr("target");
     currformid = frm;
     currform = $("#" + frm);
@@ -244,9 +278,11 @@ function addRecord(obj) {
     var into = "(";
     var vls = "(";
     $.each($("#" + frm).find("input"), function () {
-        if ($(this).attr("target") != "ID") {
-            into += "[" + $(this).attr("target") + "],";
-            vls += "'" + $(this).val() + "',";
+        if (this.hasAttribute("target")) {
+            if ($(this).attr("target") != "ID") {
+                into += "[" + $(this).attr("target") + "],";
+                vls += "'" + $(this).val() + "',";
+            }
         }
     });
     $.each($("#" + frm).find("select"), function () {
@@ -257,6 +293,7 @@ function addRecord(obj) {
     });
     into = into.substring(0, into.length - 1) + ")";
     vls = vls.substring(0, vls.length - 1) + ")";
+    document.getElementById("notesframe").href = "http://docs.google.com/gview?url=" + window.location.host +  "/Notes/" + $("#notes").val();
     var qvr = "insert into " + dbt + " " + into + " values " + vls;
     var message = JSON.stringify({ action: 'insertRow', query: qvr, fnc: "refreshTable", table: dbt });
     ws.send(message);
@@ -515,4 +552,38 @@ function addFolder(parent,elm) {
     document.getElementById("wheretogo").value = "Records/" + parent + "/" + elm;
     var message = JSON.stringify({ action: 'createFolder', parent:parent,name: elm, fnc: "document.getElementById('folderFrame').src='folders.aspx';" });
     ws.send(message);
+}
+function prepareRecordsForm() {
+ 
+    $create(Sys.Extended.UI.PopupControlBehavior, { "dynamicServicePath": "", "id": "folderExtender", "popupControlID": "framecont", "position": 3 }, null, null, $get("folder"));
+    $("#notes").bind("click", function () {
+        $("#notesframe")[0].click();
+    });
+    if ($("#uploadNoteContainer").html() == "") {
+        document.getElementById("uploadNoteContainer").appendChild(document.getElementById("AjaxFileUpload2"));
+        document.getElementById("AjaxFileUpload2").style.display = "";
+        $("#AjaxFileUpload2_Html5DropZone").hide();
+        $("#AjaxFileUpload2_FileStatusContainer").hide();
+        $("#AjaxFileUpload2_QueueContainer").empty();
+        $("#AjaxFileUpload2_QueueContainer").hide();
+        $(".ajax__fileupload").css("overflow", "hidden");
+        $("#AjaxFileUpload2_Footer").hide();
+    }
+    if ($("#uploadFilesContainer").html() == "") {
+        document.getElementById("uploadFilesContainer").appendChild(document.getElementById("AjaxFileUpload3"));
+        document.getElementById("AjaxFileUpload3").style.display = "";
+        $("#AjaxFileUpload3_Html5DropZone").hide();
+        $("#AjaxFileUpload3_FileStatusContainer").hide();
+        $("#AjaxFileUpload3_QueueContainer").empty();
+        $("#AjaxFileUpload3_QueueContainer").hide();
+        $(".ajax__fileupload").css("overflow", "hidden");
+        $("#AjaxFileUpload3_Footer").hide();
+    }
+}
+
+function setNote(path) {
+    $("#notes").val(path.replace(/ /g,"_"));
+    $("#AjaxFileUpload2_QueueContainer").empty();
+    $("#AjaxFileUpload2_Footer").hide();
+    $("#notes").trigger("change");
 }

@@ -20,8 +20,9 @@ function loginResponse(response) {
     }
     if (response.length == 2) {
         var slct = "<select id='uname'>";
+     
         $.each(response, function (index) {
-            slct += "<option value='" + index + "' " + ((index == 0) ? "selected" : "") + ">" + this.UserName + "</option>";
+            slct += "<option value='" + index + "' " + ((index == 0) ? "selected" : "") + ">" + this.display_name + "</option>";
         });
         
         var txt = "Select username " + slct;
@@ -30,13 +31,11 @@ function loginResponse(response) {
             html: txt,
             type: "question",
             allowOutsideClick: false,
-            animate: true,
             allowEscapeKey:false,
             showCancelButton: true
         }).then(function () {
           
             localStorage.user = JSON.stringify(response[uname.value]);
-            console.log(localStorage.user);
             loadAdmin("admin.html");
         });
     }

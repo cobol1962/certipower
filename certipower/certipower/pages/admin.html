@@ -26,6 +26,7 @@
                 </ul>
             </li>
             <li target="manipulate_folders"><a href="javascript:document.getElementById('folderFrame').src='folders.aspx';switchPage('manipulate_folders');">Folders</a></li>
+            <li target="records"><a href="javascript:document.getElementById('folders').src='folders2.aspx';switchPage('records');">Records</a></li>
             <!--    <li><a href="#">Another action</a></li>
                     <li><a href="#">Something else here</a></li>
                     <li class="divider"></li>
@@ -161,7 +162,7 @@
         </table>
         <div class="datacontent" id="group_usersform" target="group_users" style="display:none;">
             <input id="id" target="ID" style="display:none;" />
-            <input datasource="select_group" id="group_id" target="group_id" style="display:none;" />
+            <input datasource="select_group" disabled id="group_id" target="group_id" style="display:none;" />
             <center><button type="button" style="display:none;" formrole="prepareadd" onclick="prepareAdd(this);" class="btn btn-primary">Switch to admin entering</button></center>
             <div class="form-group col-lg-2 col-md-2 col-sm-2 col-xs-12">
                 <label class="control-label" for="display_name">Display name</label>
@@ -227,8 +228,62 @@
         </div>
     </div>
     <div class="page" id="manipulate_folders" style="display:none;">
-    
-            <iframe allowtransparency="true" style="background-color:transparent;" id="folderFrame"></iframe>
+          <iframe allowtransparency="true" style="background-color:transparent;" id="folderFrame"></iframe>
+     </div>
+    <div class="page" id="records" style="display:none;">
+        <table id="records_table" db="Records" frm="records_form" class="table table-striped table-bordered" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th target="ID">ID</th>
+                    <th action="window.frames['folders'].document.getElementById('search').value=this.innerHTML.replace(/\//g,'\\');window.frames['folders'].search();" target="folder">Folder</th>
+                    <th type="date" target="date">Date</th>
+                    <th target="notes">Notes</th>
+                    <th target="amount">Amount</th>
+                    <th type="select" select_id="priority_select" target="priority">Priority</th>
+                    <th type="select" select_id="from_select" target="received_from">From</th>
+                    <th type="select" select_id="to_select" target="sent_to">To</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <div class="datacontent" id="records_form" target="records_table" >
+            <input id="record_id" style="display:none;" target="ID" />
+            <center><button type="button" style="display:none;" formrole="prepareadd" onclick="prepareAdd(this);" class="btn btn-primary">Switch to create new record</button></center>
+            <div class="form-group col-lg-2 col-md-2 col-sm-2 col-xs-12">
+                <label class="control-label" for="date">Date</label>
+                <input type="date" format="dd.mm.yyyy" class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="date" target="date" />
+            </div>
+            <div class="form-group col-lg-2 col-md-2 col-sm-2 col-xs-12">
+                <label class="control-label" for="folder">Folder</label>
+                <input  class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="folder" target="folder" />
+            </div>
+           
+            <div class="form-group col-lg-2 col-md-2 col-sm-2 col-xs-12">
+                <label class="control-label" for="notes">Notes</label>
+                <input class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="notes" target="notes" />
+                <div id="uploadNoteContainer"></div>
+             </div>
+            <div class="form-group col-lg-2 col-md-2 col-sm-2 col-xs-12">
+                <label class="control-label" style="visibility:hidden;"></label>
+                <button  formrole="add" onclick="addRecord(this);" style="position:absolute;top:17px;" db="Records" type="button" target="records_form" class="btn btn-success">Add</button>
+                <button formrole="delete" onclick="deleteRecord(this);" style="display:none;position:absolute;top:17px;" db="Group_Users" type="button" target="records_form" class="btn btn-danger">Delete</button>
+            </div>
+        </div>
+        <div class="datacontent" id="records_files">
+            <input id="record_id" style="display:none;" target="ID" />
+            <div class="form-group col-lg-2 col-md-2 col-sm-2 col-xs-12">
+                <label class="control-label" for="notes">Files</label>
+                <input class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="files" />
+                <div id="uploadFilesContainer"></div>
+            </div>
           
-</div>
-</div>
+        </div>
+        <div id="framecont" style="width:300px;max-width:300px;height:300px;min-height:300px;display:none;">
+            <iframe id="folders" name="folders" style="height:400px;" src="folders2.aspx"></iframe>
+        </div>
+        <div id="notescont" style="width:100%;max-width:100%;height:100%;min-height:100%;display:none;">
+            <a id="notesframe" name="notesframe" href="#" target="_blank"></a>
+        </div>
+    </div>
+    </div>
+ </div>
