@@ -34,14 +34,29 @@
           
         }
         function uploadCompleted3(seneder, args) {
-            var message = JSON.stringify({ action: 'moveUploadedFile', currentUploadFolder:  localStorage.currentUploadFolder,fname: args._fileName.replace(/ /g,"_") });
+            $("#AjaxFileUpload3_QueueContainer").empty();
+            $("#AjaxFileUpload3_Footer").hide();
+            var message = JSON.stringify({ action: 'moveUploadedFile', currentUploadFolder: localStorage.currentUploadFolder, fname: args._fileName.replace(/ /g, "_") });
+            localStorage.file = args._fileName.replace(/ /g, "_");
             ws.send(message);
-
+            var dta = currenttable.row('.selected').data();
+            if (currenttableid.id == "records_table" && dta[0] != "") {
+                var qvr = " select * from Records_Files where (record_id='" + dta[0] + "' and path='" + localStorage.currentUploadFolder + "/" + args._fileName.replace(/ /g, "_") + "')";
+                var message = JSON.stringify({ action: 'getTableData', query: qvr, fnc: "checkRecordFiles" });
+                ws.send(message);
+            }
+        }
+        function checkRecordFiles(dta) {
+            var data = $.parseJSON(dta);
+            if (data.length == 0) {
+               var dta = currenttable.row('.selected').data();
+               var qvr = "insert into Records_Files (record_id,path) VALUES ('" + dta[0] + "','" + localStorage.currentUploadFolder + "/" + localStorage.file + "')";
+                var message = JSON.stringify({ action: 'execQuery', query: qvr, fnc: "displayRecordFiles();" });
+                ws.send(message);
+            }
         }
         function uploadStart3(seneder, args) {
             localStorage.currentUploadFolder = $("#folder").val();
-            $("#currentF").val($("#folder").val());
-          
         }
         function setFolder(fld) {
             $("#folder").val(fld.replace(/[\\]/g,"/"));
@@ -68,13 +83,9 @@
         <asp:Panel ID="Panel1" runat="server" Width="200" style="display:none;">
         </asp:Panel>
         <asp:Panel ID="Panel2" runat="server" Width="200" style="display:none;"></asp:Panel>
-        <input type="text" id="currentF" runat="server" />
         <div id="pages">
-
             <div class="contentContainer login">
                 <div class="loginbox align-both rounded">
-
-
                     <asp:ScriptManager ID="ScriptManager1" runat="server"></asp:ScriptManager>
                     <div class="form-group">
                         <label for="exampleInputEmail1">Email address</label>

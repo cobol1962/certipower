@@ -66,8 +66,8 @@ function setGroupList(dta) {
     });
 }
 function fillTable(tablename, dta) {
-    var data = $.parseJSON(dta);
   
+    var data = $.parseJSON(dta);
     document.getElementById(tablename).getElementsByTagName("TBODY")[0].innerHTML = "";
     var nmb = data.length;
       var done = 0;
@@ -174,15 +174,23 @@ function settableRowEvents(tablename) {
             $(this).addClass('selected');
             $.each($(this).find("td"), function () {
                 $("input[target='" + $(this).attr("target") + "']").val(this.innerHTML);
+                try {
+                    if ($("input[target='" + $(this).attr("target") + "']")[0].type == "date") {
+                        var dd = new Date(this.innerHTML.split(".")[2], parseInt(this.innerHTML.split(".")[1]) - 1, this.innerHTML.split(".")[0]);
+                        dd.setDate(dd.getDate() + 1);
+                  
+                        $("input[target='" + $(this).attr("target") + "']")[0].valueAsDate = dd;
+                    }
+                } catch (err) {
+
+                }
                 var ths = this;
                 $.each($("select[target='" + $(this).attr("target") + "']").find("option"), function () {
                     if ($(this).html() == ths.innerHTML) {
                         $("select[target='" + $(ths).attr("target") + "']").val($(this).attr("value"));
                     }
                 });
-                if (this.hasAttribute("realvalue")) {
-                    $("input[target='" + $(this).attr("target") + "']").val($(this).attr("realvalue"));
-                }
+               
                 if (this.hasAttribute("action")) {
                     eval(this.getAttribute("action"));
                 }
@@ -191,8 +199,9 @@ function settableRowEvents(tablename) {
             $("#" + this.parentNode.parentNode.getAttribute("frm")).find("button[formrole='add']").hide();
             $("#" + this.parentNode.parentNode.getAttribute("frm")).find("button[formrole='delete']").show();
             $("#" + this.parentNode.parentNode.getAttribute("frm")).find("button[formrole='prepareadd']").show();
-            document.getElementById("notesframe").href = "http://docs.google.com/gview?url=" + window.location.host +  "/Notes/" + $("#notes").val();
+            document.getElementById("notesframe").href = "http://docs.google.com/gview?url=" + window.location.host + "/Notes/" + $("#notes").val();
             eval("currenttable = " + tablename + "_datatable");
+            eval("currenttableid = " + tablename);
             eval($("#" + tablename).attr("afterselect") + ";");
         }
     });
@@ -202,7 +211,7 @@ function setEvents(formname, tablename, table) {
     $.each($("#" + formname).find("input,select"), function () {
         $(this).unbind("change");
         $(this).bind("change", function (e) {
-         
+        
             if ($("#" + formname + " input[target='" + "ID" + "']").val() == "") {
                 return false;
             }
@@ -218,9 +227,11 @@ function setEvents(formname, tablename, table) {
             }
             var newData = new Array();
             $.each($("#" + tablename + " tbody tr.selected td"), function () {
-                if (this.hasAttribute("realvalue")) {
-                    this.setAttribute("realvalue", $(this).html());
-                    $(this).html(new Date($(this).html()).toLocaleString().split(" ")[0]);
+                if (this.hasAttribute("realvalue")) { 
+                    var dd = new Date($(this).html()).toLocaleString().split(" ")[0];
+                    if (dd != "Invalid") {
+                        $(this).html(dd);
+                    }
                     newData.push($(this).html());
                 } else {
                     newData.push($(this).html());
@@ -235,8 +246,12 @@ function setEvents(formname, tablename, table) {
             popup.hidePopup();
         
             document.getElementById("notesframe").href = "http://docs.google.com/gview?url=" + window.location.host + "/Notes/" + $("#notes").val();
-            var message = JSON.stringify({ action: 'execQuery', query: "update " + $("#" + tablename).attr("db") + " set " + $(e.target).attr("target") + "='" + $(this).val() + "' where ID='" + $("#" + formname + " input[target='" + "ID" + "']").val() + "'",fnc:"" });
-            ws.send(message);
+            if ($(e.target).attr("target") !== undefined) {
+                var qvr = "update " + $("#" + tablename).attr("db") + " set " + $(e.target).attr("target") + "='" + $(this).val() + "' where ID='" + $("#" + formname + " input[target='" + "ID" + "']").val() + "'";
+               
+                var message = JSON.stringify({ action: 'execQuery', query: "update " + $("#" + tablename).attr("db") + " set " + $(e.target).attr("target") + "='" + $(this).val() + "' where ID='" + $("#" + formname + " input[target='" + "ID" + "']").val() + "'", fnc: "" });
+                ws.send(message);
+            }
         });
     });
 }
@@ -262,6 +277,7 @@ function prepareAdd(obj) {
     $("#user_subform").hide();
 }
 var currenttable = null;
+var currenttableid = null;
 var currform = null;
 var currformid = "";
 var lastInsertedId = "";
@@ -275,6 +291,7 @@ function addRecord(obj) {
     currformid = frm;
     currform = $("#" + frm);
     eval("currenttable = " + $("#" + frm).attr("target") + "_datatable;");
+    eval("currenttableid = " + $("#" + frm).attr("target"));
     var into = "(";
     var vls = "(";
     $.each($("#" + frm).find("input"), function () {
@@ -553,6 +570,7 @@ function addFolder(parent,elm) {
     var message = JSON.stringify({ action: 'createFolder', parent:parent,name: elm, fnc: "document.getElementById('folderFrame').src='folders.aspx';" });
     ws.send(message);
 }
+var wed = null;
 function prepareRecordsForm() {
  
     $create(Sys.Extended.UI.PopupControlBehavior, { "dynamicServicePath": "", "id": "folderExtender", "popupControlID": "framecont", "position": 3 }, null, null, $get("folder"));
@@ -579,6 +597,21 @@ function prepareRecordsForm() {
         $(".ajax__fileupload").css("overflow", "hidden");
         $("#AjaxFileUpload3_Footer").hide();
     }
+  
+    CKEDITOR.replace("file_description");
+    CKEDITOR.instances.file_description.on('change', function () {
+        if (wed == null) {
+            wed = setTimeout(function () {
+                saveRecordDescription();
+            }, 500);
+        } else {
+            wed = null;
+            clearTimeout(wed);
+            wed = setTimeout(function () {
+                saveRecordDescription();
+            }, 500);
+        }
+    });
 }
 
 function setNote(path) {
@@ -586,4 +619,77 @@ function setNote(path) {
     $("#AjaxFileUpload2_QueueContainer").empty();
     $("#AjaxFileUpload2_Footer").hide();
     $("#notes").trigger("change");
+}
+function displayRecordFiles() {
+  
+      var ww = setInterval(function () {
+            try {
+                clearInterval(ww);
+                var dta = currenttable.row('.selected').node();
+            
+                CKEDITOR.instances.file_description.setData(Base64.decode(dta.getElementsByTagName("TD")[8].innerHTML));
+                var qvr = "select * from Records_Files   where  record_id='" + dta[0] + "'";
+                var message = JSON.stringify({ action: 'getTableData', query: qvr, fnc: "showRecordFiles" });
+                ws.send(message);
+            } catch (err) {
+                alert(err);
+            }
+        }, 50);
+   
+}
+function showRecordFiles(dta) {
+    var data = $.parseJSON(dta);
+
+    document.getElementById("record_files").getElementsByTagName("TBODY")[0].innerHTML = "";
+    $.each(data, function () {
+        var tr = document.createElement("TR");
+        var td = document.createElement("TD");
+        td.style.display = "none";
+        td.innerHTML = this.ID;
+        tr.appendChild(td);
+        var td = document.createElement("TD");
+        td.innerHTML = '<a href="http://docs.google.com/gview?url=' + window.location.host + "/records/" + this.path + '" target="_blank">' + this.path.substring(this.path.lastIndexOf("/") + 1) + '</a>';
+        tr.appendChild(td);
+        var td = document.createElement("TD");
+        td.innerHTML = ' <button  onclick="deleteRecordFile(this);"   type="button" target="records_form" class="btn btn-danger btn-sm">Remove from record</button>'
+        tr.appendChild(td);
+        document.getElementById("record_files").getElementsByTagName("TBODY")[0].appendChild(tr);
+    });
+}
+function saveRecordDescription() {
+    try {
+        var dta = currenttable.row('.selected').data();
+        if (currenttableid.id == "records_table" && dta[0] != "") {
+            var dn = currenttable.row('.selected').node();
+            dn.getElementsByTagName("TD")[8].innerHTML = Base64.encode(CKEDITOR.instances.file_description.getData());
+            var qvr = "update Records set file_description='" + Base64.encode(CKEDITOR.instances.file_description.getData()) + "' where ID='" + dta[0] + "'";
+            var message = JSON.stringify({ action: 'execQuery', query: qvr, fnc: "" });
+            ws.send(message);
+        }
+    } catch (err) {
+       
+    }
+ 
+}
+function updateFileDescription(dat) {
+    console.log(dat);
+}
+function htmlEscape(str) {
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
+
+// I needed the opposite function today, so adding here too:
+function htmlUnescape(str) {
+    return str
+         .replace(/&nbsp;/g, ' ')
+        .replace(/&quot;/g, '\"')
+        .replace(/&#39;/g, "'")
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&amp;/g, '&');
 }

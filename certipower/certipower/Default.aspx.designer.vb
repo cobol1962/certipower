@@ -95,15 +95,6 @@ Partial Public Class _Default
     Protected WithEvents Panel2 As Global.System.Web.UI.WebControls.Panel
     
     '''<summary>
-    '''currentF control.
-    '''</summary>
-    '''<remarks>
-    '''Auto-generated field.
-    '''To modify move field declaration from designer file to code-behind file.
-    '''</remarks>
-    Protected WithEvents currentF As Global.System.Web.UI.HtmlControls.HtmlInputText
-    
-    '''<summary>
     '''ScriptManager1 control.
     '''</summary>
     '''<remarks>

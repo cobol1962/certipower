@@ -2022,6 +2022,8 @@
     <Content Include="Content\assets\vendor\x-editable\images\loading.gif" />
     <Content Include="Content\assets\vendor\x-editable\x-editable.css" />
     <Content Include="Content\assets\vendor\x-editable\x-editable.min.css" />
+    <Content Include="Content\bootstrap-datepicker.css" />
+    <Content Include="jslib\bootstrap-datepicker.js" />
     <Content Include="Content\bootstrap-extend.css" />
     <Content Include="Content\bootstrap-extend.min.css" />
     <Content Include="Content\bootstrap-theme.css" />

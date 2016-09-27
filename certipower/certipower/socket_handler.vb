@@ -56,11 +56,11 @@ Public Class socket_handler
         End If
     End Sub
     Public Function moveUploadedFile(message As Object)
-        Using _testData As StreamWriter = New StreamWriter(HttpContext.Current.Server.MapPath("~/Records/data.txt"), True)
-            _testData.WriteLine("csf = " & message("currentUploadFolder") & " //// " & message("fname"))
-        End Using
         Dim p1 As String = HttpContext.Current.Server.MapPath("~/Records/" & message("fname"))
         Dim p2 As String = HttpContext.Current.Server.MapPath("~/Records/" & message("currentUploadFolder") & "/" & message("fname"))
+        If File.Exists(p2) Then
+            File.Delete(p2)
+        End If
         File.Move(p1, p2)
         Return ""
     End Function
@@ -143,7 +143,7 @@ Public Class socket_handler
                 Dim fields As Integer = rdr.FieldCount
                 For i = 0 To fields - 1
                     writer.WritePropertyName(rdr.GetName(i))
-                    writer.WriteValue(rdr(i))
+                    writer.WriteValue(rdr(i).ToString.Replace("\\", "\\\\").Replace("'", "\\'").Replace("""", ""))
                 Next
                 writer.WriteEndObject()
             End While
@@ -154,13 +154,13 @@ Public Class socket_handler
     Public Function setGroupPrivileges(message As Object) As String
         Dim idg As String = message("groupid")
         Dim connection As New SqlConnection(My.Settings.connstring)
-        Dim sql As String = "SELECT * from Privileges"
+        Dim sql As String = "Select * from Privileges"
         connection.Open()
         Dim command As SqlCommand = New SqlCommand(sql, connection)
         Dim rdr As SqlDataReader = command.ExecuteReader()
         Dim rstr As String = ""
         While rdr.Read
-            Dim sql1 As String = "insert into Group_Privileges (group_id,privileg_id) VALUES ('" & idg & "','" & rdr("ID") & "');"
+            Dim sql1 As String = "insert into Group_Privileges (group_id, privileg_id) VALUES ('" & idg & "','" & rdr("ID") & "');"
             Dim connection1 As New SqlConnection(My.Settings.connstring)
             connection1.Open()
             Dim command1 As SqlCommand = New SqlCommand(sql1, connection1)
